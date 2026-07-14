@@ -21,7 +21,8 @@ class TransaksiController extends Controller
     {
         $pelanggans = Pelanggan::all();
         // Hanya tampilkan alat yang stoknya masih ada (> 0)
-        $alats = Alat::where('stok', '>', 0)->get(); 
+        // Pastikan memberikan argumen boolean ke-4 untuk signature yang membutuhkan 4 parameter
+        $alats = Alat::where('stok', '>', 0, 'and')->get();
         return view('transaksi.create', compact('pelanggans', 'alats'));
     }
 
@@ -92,7 +93,8 @@ class TransaksiController extends Controller
             $alat->increment('stok');
         }
         
-        $transaksi->delete();
+        // Gunakan destroy dengan id untuk menghindari error signature jika delete membutuhkan argumen
+        Transaksi::destroy($transaksi->id);
         return redirect()->route('transaksi.index')->with('success', 'Data riwayat transaksi dihapus!');
     }
 }

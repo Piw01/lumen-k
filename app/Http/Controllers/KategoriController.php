@@ -51,7 +51,8 @@ class KategoriController extends Controller
     // 6. Hapus Data
     public function destroy(Kategori $kategori)
     {
-        $kategori->delete();
+        // Use destroy with the model id to match the model's delete signature
+        Kategori::destroy($kategori->id);
         return redirect()->route('kategori.index')->with('success', 'Kategori berhasil dihapus!');
     }
 }

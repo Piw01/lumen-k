@@ -52,7 +52,8 @@ class PelangganController extends Controller
 
     public function destroy(Pelanggan $pelanggan)
     {
-        $pelanggan->delete();
+        // Use static destroy with ID to satisfy methods expecting an argument
+        Pelanggan::destroy($pelanggan->id);
         return redirect()->route('pelanggan.index')->with('success', 'Data Pelanggan berhasil dihapus!');
     }
 }

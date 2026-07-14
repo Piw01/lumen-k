@@ -9,10 +9,10 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 
 // ==========================================
-// 1. RUTE PUBLIK (BISA DIAKSES SIAPA SAJA / GUEST)
+// 1. RUTE PUBLIK (GUEST)
 // ==========================================
 Route::get('/', function () {
-    return view('welcome'); 
+    return view('welcome'); // Halaman landing page publik
 })->name('home');
 
 Route::middleware('guest')->group(function () {
@@ -23,33 +23,32 @@ Route::middleware('guest')->group(function () {
 });
 
 // ==========================================
-// 2. RUTE TERPROTEKSI (WAJIB LOGIN DULU)
+// 2. RUTE TERPROTEKSI (WAJIB LOGIN)
 // ==========================================
 Route::middleware('auth')->group(function () {
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // --------------------------------------
-    // HAK AKSES: KELOMPOK INTERNAL (SUPER ADMIN & STAF)
-    // Mampu mengelola semua Master Data & Operasional Toko
+    // SUPER ADMIN & STAF (Internal)
     // --------------------------------------
     Route::middleware('role:super_admin,staf')->group(function () {
         
-    Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard'); // <-- UBAH BARIS INI
+        Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
 
-    Route::resource('kategori', KategoriController::class);
-    Route::resource('alat', AlatController::class);
-    Route::resource('pelanggan', PelangganController::class);
-    Route::resource('transaksi', TransaksiController::class)->except(['edit', 'update']);
-    Route::patch('/transaksi/{transaksi}/status', [TransaksiController::class, 'updateStatus'])->name('transaksi.updateStatus');
+        Route::resource('kategori', KategoriController::class);
+        Route::resource('alat', AlatController::class);
+        Route::resource('pelanggan', PelangganController::class);
+        
+        Route::resource('transaksi', TransaksiController::class)->except(['edit', 'update']);
+        Route::patch('/transaksi/{transaksi}/status', [TransaksiController::class, 'updateStatus'])->name('transaksi.updateStatus');
     });
 
     // --------------------------------------
-    // HAK AKSES: KELOMPOK EKSTERNAL (CUSTOMER ONLY)
-    // Tempat menaruh rute Keranjang Belanja & Transaksi Mandiri nanti
+    // CUSTOMER ONLY (Eksternal)
     // --------------------------------------
     Route::middleware('role:customer')->group(function () {
-        // Rute untuk fungsionalitas customer akan kita letakkan di sini pada fase berikutnya
+        // Rute untuk keranjang belanja akan dibuat di sini nanti
     });
 
 });
