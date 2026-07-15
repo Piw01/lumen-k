@@ -12,8 +12,12 @@ use App\Http\Controllers\AuthController;
 // 1. RUTE PUBLIK (GUEST)
 // ==========================================
 Route::get('/', function () {
-    return view('welcome'); // Halaman landing page publik
-})->name('home');
+    // Mengambil semua data alat dari database
+    $alats = \App\Models\Alat::latest()->paginate(10); 
+    
+    // Mengirim data alat ke halaman welcome
+    return view('welcome', compact('alats'));
+})->name('landing');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
