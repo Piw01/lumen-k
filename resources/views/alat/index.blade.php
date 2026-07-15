@@ -1,54 +1,62 @@
 <x-layout>
-    <x-slot:title>Daftar Alat | Lumen-K</x-slot:title>
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold" style="color: #facc15;">MASTER ALAT / KATALOG</h2>
-        <a href="{{ route('alat.create') }}" class="btn ds-btn">+ TAMBAH ALAT</a>
-    </div>
-
-    @if(session('success'))
-        <div class="alert alert-success bg-dark text-success border-success small mb-4">
-            {{ session('success') }}
+    <div class="container my-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+            <h3 class="text-white mb-0">MANAJEMEN ALAT</h3>
+            <a href="{{ route('alat.create') }}" class="btn btn-warning fw-bold text-dark">
+                <i class="bi bi-plus-lg"></i> Tambah Alat Baru
+            </a>
         </div>
-    @endif
 
-    <div class="card p-0">
-        <div class="table-responsive">
-            <table class="table table-dark table-hover mb-0">
-                <thead>
-                    <tr style="border-bottom: 2px solid #333;">
-                        <th class="px-4 py-3">#</th>
-                        <th class="py-3">NAMA ALAT</th>
-                        <th class="py-3">KATEGORI</th>
-                        <th class="py-3">MERK</th>
-                        <th class="py-3 text-end">HARGA / HARI</th>
-                        <th class="py-3 text-center">STOK</th>
-                        <th class="text-end px-4 py-3">AKSI</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($alats as $a)
-                    <tr style="border-bottom: 1px solid #222;">
-                        <td class="px-4 py-3 text-muted">{{ $loop->iteration }}</td>
-                        <td class="py-3 fw-bold">{{ $a->nama_alat }}</td>
-                        <!-- Mengambil nama kategori dari relasi -->
-                        <td class="py-3 text-warning small">{{ $a->kategori->nama_kategori ?? 'Tidak ada Kategori' }}</td>
-                        <td class="py-3 text-muted">{{ $a->merk }}</td>
-                        <td class="py-3 text-end">Rp {{ number_format($a->harga_sewa, 0, ',', '.') }}</td>
-                        <td class="py-3 text-center">
-                            <span class="badge {{ $a->stok > 0 ? 'bg-success' : 'bg-danger' }}">{{ $a->stok }}</span>
-                        </td>
-                        <td class="text-end px-4 py-3">
-                            <a href="{{ route('alat.edit', $a->id) }}" class="btn btn-sm btn-outline-info me-1">EDIT</a>
-                            <form action="{{ route('alat.destroy', $a->id) }}" method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus alat ini?')">HAPUS</button>
-                            </form>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        @if(session('success'))
+            <div class="alert alert-success py-2">{{ session('success') }}</div>
+        @endif
+
+        <div class="card p-0 shadow" style="background-color: #1a1a1a; border: 1px solid #333333;">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0" style="border-color: #333333;">
+                    <thead style="border-bottom: 2px solid #555;">
+                        <tr>
+                            <th class="py-3 text-warning">GAMBAR</th>
+                            <th class="py-3 text-warning">NAMA ALAT</th>
+                            <th class="py-3 text-warning">KATEGORI</th>
+                            <th class="py-3 text-warning">MERK</th>
+                            <th class="py-3 text-warning text-end">HARGA / HARI</th>
+                            <th class="py-3 text-warning text-center">STOK</th>
+                            <th class="py-3 text-warning text-center">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($alats as $item)
+                        <tr>
+                            <td class="align-middle">
+                                @if($item->gambar)
+                                    <img src="{{ asset('storage/' . $item->gambar) }}" alt="Gambar Alat" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                                @else
+                                    <div class="bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 60px; height: 60px; font-size: 10px; border-radius: 4px;">No Img</div>
+                                @endif
+                            </td>
+                            <td class="align-middle text-white fw-bold">{{ $item->nama_alat }}</td>
+                            <td class="align-middle text-muted">{{ $item->kategori->nama_kategori ?? '-' }}</td>
+                            <td class="align-middle text-muted">{{ $item->merk }}</td>
+                            <td class="align-middle text-success fw-bold text-end">Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}</td>
+                            <td class="align-middle text-center text-white">{{ $item->stok }}</td>
+                            <td class="align-middle text-center">
+                                <a href="{{ route('alat.edit', $item->id) }}" class="btn btn-sm btn-outline-info">Edit</a>
+                                <form action="{{ route('alat.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus alat ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-outline-danger">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Belum ada data alat.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </x-layout>

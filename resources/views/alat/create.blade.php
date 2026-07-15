@@ -1,48 +1,67 @@
 <x-layout>
-    <x-slot:title>Tambah Alat | Lumen-K</x-slot:title>
+    <div class="container my-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card p-4 shadow" style="background-color: #1a1a1a; border: 1px solid #333333;">
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-3">
+                        <h4 class="text-warning mb-0">TAMBAH ALAT BARU</h4>
+                        <a href="{{ route('alat.index') }}" class="btn btn-sm btn-outline-light">Kembali</a>
+                    </div>
 
-    <div class="max-w-2xl mx-auto">
-        <h2 class="fw-bold mb-4" style="color: #facc15;">INPUT ALAT BARU</h2>
-        
-        <div class="card p-4" style="background-color: #111; border: 1px solid #333;">
-            <form action="{{ route('alat.store') }}" method="POST">
-                @csrf
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-muted small fw-bold">NAMA ALAT</label>
-                        <input type="text" name="nama_alat" class="form-control bg-black text-white border-secondary" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-muted small fw-bold">KATEGORI</label>
-                        <select name="kategori_id" class="form-select bg-black text-white border-secondary" required>
-                            <option value="">-- Pilih Kategori --</option>
-                            @foreach($kategoris as $k)
-                                <option value="{{ $k->id }}">{{ $k->nama_kategori }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
+                    <!-- PENTING: enctype="multipart/form-data" WAJIB untuk upload file -->
+                    <form action="{{ route('alat.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-white">Nama Alat</label>
+                            <input type="text" name="nama_alat" class="form-control bg-dark text-white border-secondary @error('nama_alat') is-invalid @enderror" value="{{ old('nama_alat') }}" required>
+                            @error('nama_alat') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
 
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small fw-bold">MERK</label>
-                        <input type="text" name="merk" class="form-control bg-black text-white border-secondary" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small fw-bold">HARGA SEWA (Rp)</label>
-                        <input type="number" name="harga_sewa" class="form-control bg-black text-white border-secondary" required>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <label class="form-label text-muted small fw-bold">STOK AWAL</label>
-                        <input type="number" name="stok" class="form-control bg-black text-white border-secondary" value="1" required>
-                    </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white">Kategori</label>
+                                <select name="kategori_id" class="form-select bg-dark text-white border-secondary @error('kategori_id') is-invalid @enderror" required>
+                                    <option value="">-- Pilih Kategori --</option>
+                                    @foreach($kategoris as $kategori)
+                                        <option value="{{ $kategori->id }}" {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
+                                            {{ $kategori->nama_kategori }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('kategori_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white">Merk</label>
+                                <input type="text" name="merk" class="form-control bg-dark text-white border-secondary @error('merk') is-invalid @enderror" value="{{ old('merk') }}" required>
+                                @error('merk') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white">Harga Sewa per Hari (Rp)</label>
+                                <input type="number" name="harga_sewa" class="form-control bg-dark text-white border-secondary @error('harga_sewa') is-invalid @enderror" value="{{ old('harga_sewa') }}" required>
+                                @error('harga_sewa') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white">Stok Barang</label>
+                                <input type="number" name="stok" class="form-control bg-dark text-white border-secondary @error('stok') is-invalid @enderror" value="{{ old('stok') }}" required>
+                                @error('stok') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-white">Upload Gambar Alat (Opsional)</label>
+                            <input type="file" name="gambar" class="form-control bg-dark text-muted border-secondary @error('gambar') is-invalid @enderror" accept="image/*">
+                            <small class="text-muted">Format: JPG, PNG. Maksimal: 2MB.</small>
+                            @error('gambar') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <button type="submit" class="btn btn-warning fw-bold text-dark w-100">SIMPAN DATA ALAT</button>
+                    </form>
                 </div>
-                
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn ds-btn flex-grow-1">SIMPAN KATALOG</button>
-                    <a href="{{ route('alat.index') }}" class="btn btn-outline-secondary">BATAL</a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </x-layout>

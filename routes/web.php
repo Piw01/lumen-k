@@ -13,11 +13,11 @@ use App\Http\Controllers\AuthController;
 // ==========================================
 Route::get('/', function () {
     // Mengambil semua data alat dari database
-    $alats = \App\Models\Alat::latest()->paginate(10); 
+    $alats = \App\Models\Alat::latest('created_at')->get(); 
     
     // Mengirim data alat ke halaman welcome
     return view('welcome', compact('alats'));
-})->name('landing');
+})->name('welcome');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

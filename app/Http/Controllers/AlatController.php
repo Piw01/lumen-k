@@ -3,37 +3,45 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alat;
-use App\Models\Kategori; // Kita butuh model Kategori untuk dropdown
+use App\Models\Kategori;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AlatController extends Controller
 {
     public function index()
     {
-        // get() dengan with() untuk mengambil relasi kategori sekaligus (Eager Loading)
-        $alats = Alat::with('kategori')->get();
+        // Mengambil semua data alat beserta relasi kategorinya
+        $alats = Alat::with('kategori')->latest()->get();
         return view('alat.index', compact('alats'));
     }
 
     public function create()
     {
-        // Ambil semua kategori untuk ditampilkan di dropdown form
+        // Mengambil data kategori untuk dropdown (select)
         $kategoris = Kategori::all();
         return view('alat.create', compact('kategoris'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'kategori_id' => 'required',
-            'nama_alat' => 'required',
-            'merk' => 'required',
-            'harga_sewa' => 'required|numeric',
-            'stok' => 'required|numeric',
+        $validated = $request->validate([
+            'kategori_id' => 'required|exists:kategoris,id',
+            'nama_alat' => 'required|string|max:255',
+            'merk' => 'required|string|max:255',
+            'harga_sewa' => 'required|numeric|min:0',
+            'stok' => 'required|numeric|min:0',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Validasi file gambar
         ]);
 
-        Alat::create($request->all());
-        return redirect()->route('alat.index')->with('success', 'Data alat berhasil ditambahkan!');
+        // Logika upload gambar
+        if ($request->hasFile('gambar')) {
+            $validated['gambar'] = $request->file('gambar')->store('alats', 'public');
+        }
+
+        Alat::create($validated);
+
+        return redirect()->route('alat.index')->with('success', 'Data Alat berhasil ditambahkan!');
     }
 
     public function edit(Alat $alat)
@@ -44,21 +52,40 @@ class AlatController extends Controller
 
     public function update(Request $request, Alat $alat)
     {
-        $request->validate([
-            'kategori_id' => 'required',
-            'nama_alat' => 'required',
-            'merk' => 'required',
-            'harga_sewa' => 'required|numeric',
-            'stok' => 'required|numeric',
+        $validated = $request->validate([
+            'kategori_id' => 'required|exists:kategoris,id',
+            'nama_alat' => 'required|string|max:255',
+            'merk' => 'required|string|max:255',
+            'harga_sewa' => 'required|numeric|min:0',
+            'stok' => 'required|numeric|min:0',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $alat->update($request->all());
-        return redirect()->route('alat.index')->with('success', 'Data alat berhasil diupdate!');
+        // Jika user mengunggah gambar baru
+        if ($request->hasFile('gambar')) {
+            // Hapus gambar lama jika ada
+            if ($alat->gambar) {
+                Storage::disk('public')->delete($alat->gambar);
+            }
+            // Simpan gambar baru
+            $validated['gambar'] = $request->file('gambar')->store('alats', 'public');
+        }
+
+        $alat->update($validated);
+
+        return redirect()->route('alat.index')->with('success', 'Data Alat berhasil diperbarui!');
     }
 
     public function destroy(Alat $alat)
     {
-        $alat->delete();
-        return redirect()->route('alat.index')->with('success', 'Data alat berhasil dihapus!');
+        // Hapus file gambar dari server jika ada
+        if ($alat->gambar) {
+            Storage::disk('public')->delete($alat->gambar);
+        }
+        
+        // Use static destroy with id to avoid argument mismatch on instance delete
+        Alat::destroy($alat->id);
+
+        return redirect()->route('alat.index')->with('success', 'Data Alat berhasil dihapus!');
     }
 }
